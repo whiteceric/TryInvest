@@ -3,4 +3,6 @@ export const Colors = {
   primary: "#DCEED1",
   secondary: "#A18276",
   negative: "#C70000",
+  black: "#000",
+  white: "#fff",
 };
