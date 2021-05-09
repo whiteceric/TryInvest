@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
+  TextInput,
   View,
   SafeAreaView,
   TouchableOpacity,
@@ -47,14 +48,48 @@ const stockList = [
 ]; // Object.keys(api);
 
 export const TradeScreen = ({ navigation }) => {
+  const [cash, setCash] = useState(0);
   const [stock, setStock] = useState(null);
   const [tradeMode, setTradeMode] = useState("BUY");
-  const [cash, setCash] = useState(0);
+  const [moreInfoDisabled, setMoreInfoDisabled] = useState(false);
+  const [confirmDisabled, setConfirmDisabled] = useState(false);
+  const [numShares, setNumShares] = useState(0);
+  const [numSharesFocused, setNumSharesFocused] = useState(false);
 
   useEffect(() => {
     setCash(500.34);
-    setStock(api["AAPL"]);
+    //setStock(api["AAPL"]);
   }, []);
+
+  const symbolSelected = (symbol) => {
+    if (api.hasOwnProperty(symbol)) {
+      setStock(api[symbol]);
+    } else {
+      setStock(null);
+    }
+    setMoreInfoDisabled(stock == null);
+    setConfirmDisabled(stock == null);
+  };
+
+  const onNumSharesFocus = () => {
+    setNumSharesFocused(true);
+    setNumShares(0);
+  };
+
+  const onNumSharesInput = (newText) => {
+    console.log(newText);
+    if (newText.length == 0) {
+      setNumShares(0);
+    } else if (newText.indexOf(".") == -1 && !isNaN(+newText)) {
+      setNumShares(Math.min(99999, newText));
+    }
+  };
+
+  const onNumSharesSubmit = () => {
+    console.log(numShares);
+    setNumSharesFocused(false);
+    setConfirmDisabled(numShares == 0);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -101,8 +136,58 @@ export const TradeScreen = ({ navigation }) => {
         dropdownItemStyle={styles.searchDropdownItem}
         dropdownItemText={styles.searchDropdownText}
         defaultText={"Search"}
+        onSelect={symbolSelected}
         items={stockList}
       />
+      <Text style={styles.stockPrice}>
+        {stock == null ? formatPrice(0) : formatPrice(stock.currentPrice)}
+        {console.log(stock)}
+      </Text>
+      <TouchableOpacity
+        style={[
+          styles.moreInfoButton,
+          moreInfoDisabled ? styles.disabledButtonStyle : {},
+        ]}
+        onPress={() => console.log("More Info")}
+        disabled={moreInfoDisabled}
+        activeOpacity={0.7}
+      >
+        <Text style={styles.moreInfoButtonText}>More Info</Text>
+      </TouchableOpacity>
+      <View style={styles.numSharesContainer}>
+        <Text style={styles.numSharesLabel}># of Shares</Text>
+        <TextInput
+          value={
+            numSharesFocused
+              ? numShares == 0
+                ? ""
+                : String(numShares)
+              : String(numShares)
+          }
+          onFocus={onNumSharesFocus}
+          onChangeText={onNumSharesInput}
+          onSubmitEditing={onNumSharesSubmit}
+          textAlign={"right"}
+          style={styles.numSharesInput}
+        />
+      </View>
+      <Text style={styles.estimatedValue}>
+        Estimated {tradeMode == "BUY" ? "Cost" : "Value"}:{" "}
+        {stock == null
+          ? formatPrice(0)
+          : formatPrice(numShares * stock.currentPrice)}
+      </Text>
+      <TouchableOpacity
+        style={[
+          styles.confirmButton,
+          confirmDisabled ? styles.disabledButtonStyle : {},
+        ]}
+        onPress={() => console.log("Confirm")}
+        disabled={confirmDisabled}
+        activeOpacity={0.7}
+      >
+        <Text style={styles.confirmButtonText}>Confirm</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -157,8 +242,8 @@ const styles = StyleSheet.create({
   },
   searchBarContainer: {
     marginVertical: 20,
-    flex: 1,
     width: "80%",
+    zIndex: 999,
   },
   searchBar: {
     backgroundColor: Colors.primary,
@@ -171,6 +256,9 @@ const styles = StyleSheet.create({
   },
   searchDropdownContainer: {
     backgroundColor: Colors.primary,
+    position: "absolute",
+    top: 45,
+    width: "100%",
     minHeight: 45,
     maxHeight: 200,
     borderColor: Colors.black,
@@ -188,5 +276,64 @@ const styles = StyleSheet.create({
   },
   searchDropdownText: {
     fontSize: 24,
+  },
+  stockPrice: {
+    color: Colors.primary,
+    fontSize: 70,
+    fontWeight: "bold",
+  },
+  moreInfoButton: {
+    backgroundColor: Colors.secondary,
+    marginVertical: 10,
+    width: "45%",
+    height: 40,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  moreInfoButtonText: {
+    color: Colors.primary,
+    fontSize: 25,
+    fontWeight: "bold",
+  },
+  numSharesContainer: {
+    flexDirection: "row",
+    marginVertical: 10,
+    justifyContent: "space-between",
+  },
+  numSharesLabel: {
+    fontSize: 40,
+    fontWeight: "bold",
+    color: Colors.primary,
+    marginRight: 20,
+  },
+  numSharesInput: {
+    backgroundColor: Colors.primary,
+    padding: 5,
+    width: "35%",
+    height: 50,
+    fontSize: 40,
+  },
+  estimatedValue: {
+    fontSize: 30,
+    color: Colors.primary,
+    marginVertical: 10,
+  },
+  confirmButton: {
+    backgroundColor: Colors.secondary,
+    marginVertical: 20,
+    width: "80%",
+    height: 80,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  confirmButtonText: {
+    color: Colors.primary,
+    fontSize: 25,
+    fontWeight: "bold",
+  },
+  disabledButtonStyle: {
+    opacity: 0.7,
   },
 });

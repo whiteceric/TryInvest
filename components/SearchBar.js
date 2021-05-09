@@ -20,7 +20,8 @@ export const SearchBar = ({
   dropdownContainerStyle,
   dropdownItemStyle,
   dropdownItemText,
-  items,
+  onSelect,
+  items, // should be an array of strings
   defaultText,
 }) => {
   const [text, setText] = useState(defaultText);
@@ -54,6 +55,7 @@ export const SearchBar = ({
     if (text === "") {
       setText(defaultText);
     }
+    onSelect(text);
     setDropdownActive(false);
   };
 
@@ -63,6 +65,7 @@ export const SearchBar = ({
       onPress={() => {
         setDropdownActive(false);
         setText(item);
+        onSelect(item);
       }}
     >
       <Text style={dropdownItemText}>{item}</Text>
