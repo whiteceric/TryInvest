@@ -21,6 +21,8 @@ export const SearchBar = ({
   dropdownItemStyle,
   dropdownItemText,
   onSelect,
+  onFocus,
+  onDefocus,
   items, // should be an array of strings
   defaultText,
 }) => {
@@ -45,27 +47,31 @@ export const SearchBar = ({
     } else setDropdownActive(false);
   };
 
-  const onFocus = () => {
+  const _onFocus = () => {
     if (text === defaultText) {
       setText("");
     }
+    onFocus();
   };
 
-  const onDefocus = () => {
+  const _onDefocus = () => {
     if (text === "") {
       setText(defaultText);
     }
     onSelect(text);
     setDropdownActive(false);
+    onDefocus();
   };
 
-  const renderItem = ({ item, index }) => (
+  const renderItem = ({ item }) => (
     <TouchableOpacity
       style={dropdownItemStyle}
       onPress={() => {
         setDropdownActive(false);
         setText(item);
         onSelect(item);
+        console.log("selecting " + item);
+        onDefocus();
       }}
     >
       <Text style={dropdownItemText}>{item}</Text>
@@ -78,9 +84,14 @@ export const SearchBar = ({
         <TextInput
           style={textStyle}
           value={text}
-          onFocus={onFocus}
-          onSubmitEditing={onDefocus}
+          selectTextOnFocus={true}
+          onFocus={_onFocus}
+          onSubmitEditing={_onDefocus}
           onChangeText={onChangeText}
+          autoCorrect={false}
+          autoCapitalize="none"
+          returnKeyType="search"
+          autoCompleteType="off"
         />
       </View>
       {dropdownActive && dropdownItems.length > 0 ? (

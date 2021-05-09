@@ -5,6 +5,7 @@ import {
   TextInput,
   View,
   SafeAreaView,
+  KeyboardAvoidingView,
   TouchableOpacity,
 } from "react-native";
 
@@ -55,6 +56,7 @@ export const TradeScreen = ({ navigation }) => {
   const [confirmDisabled, setConfirmDisabled] = useState(false);
   const [numShares, setNumShares] = useState(0);
   const [numSharesFocused, setNumSharesFocused] = useState(false);
+  const [searching, setSearching] = useState(false);
 
   useEffect(() => {
     setCash(500.34);
@@ -64,11 +66,14 @@ export const TradeScreen = ({ navigation }) => {
   const symbolSelected = (symbol) => {
     if (api.hasOwnProperty(symbol)) {
       setStock(api[symbol]);
+      console.log("setting " + symbol);
+      setMoreInfoDisabled(false);
+      setConfirmDisabled(false);
     } else {
       setStock(null);
+      setMoreInfoDisabled(true);
+      setConfirmDisabled(true);
     }
-    setMoreInfoDisabled(stock == null);
-    setConfirmDisabled(stock == null);
   };
 
   const onNumSharesFocus = () => {
@@ -137,6 +142,8 @@ export const TradeScreen = ({ navigation }) => {
         dropdownItemText={styles.searchDropdownText}
         defaultText={"Search"}
         onSelect={symbolSelected}
+        onFocus={() => setSearching(true)}
+        onDefocus={() => setSearching(false)}
         items={stockList}
       />
       <Text style={styles.stockPrice}>
@@ -148,29 +155,35 @@ export const TradeScreen = ({ navigation }) => {
           styles.moreInfoButton,
           moreInfoDisabled ? styles.disabledButtonStyle : {},
         ]}
-        onPress={() => console.log("More Info")}
+        onPress={() => {
+          navigation.navigate("Stock Info", { tag: stock.tag });
+        }}
         disabled={moreInfoDisabled}
         activeOpacity={0.7}
       >
         <Text style={styles.moreInfoButtonText}>More Info</Text>
       </TouchableOpacity>
-      <View style={styles.numSharesContainer}>
-        <Text style={styles.numSharesLabel}># of Shares</Text>
-        <TextInput
-          value={
-            numSharesFocused
-              ? numShares == 0
-                ? ""
+      <KeyboardAvoidingView behavior="position" enabled={!searching}>
+        <View style={styles.numSharesContainer}>
+          <Text style={styles.numSharesLabel}># of Shares</Text>
+          <TextInput
+            value={
+              numSharesFocused
+                ? numShares == 0
+                  ? ""
+                  : String(numShares)
                 : String(numShares)
-              : String(numShares)
-          }
-          onFocus={onNumSharesFocus}
-          onChangeText={onNumSharesInput}
-          onSubmitEditing={onNumSharesSubmit}
-          textAlign={"right"}
-          style={styles.numSharesInput}
-        />
-      </View>
+            }
+            onFocus={onNumSharesFocus}
+            onChangeText={onNumSharesInput}
+            onSubmitEditing={onNumSharesSubmit}
+            textAlign={"right"}
+            keyboardType="number-pad"
+            returnKeyType="done"
+            style={styles.numSharesInput}
+          />
+        </View>
+      </KeyboardAvoidingView>
       <Text style={styles.estimatedValue}>
         Estimated {tradeMode == "BUY" ? "Cost" : "Value"}:{" "}
         {stock == null
@@ -194,8 +207,8 @@ export const TradeScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.background,
     flex: 1,
+    backgroundColor: Colors.background,
     alignItems: "center",
   },
   headerText: {
@@ -300,6 +313,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginVertical: 10,
     justifyContent: "space-between",
+    backgroundColor: Colors.background,
+    padding: 5,
   },
   numSharesLabel: {
     fontSize: 40,
@@ -317,7 +332,6 @@ const styles = StyleSheet.create({
   estimatedValue: {
     fontSize: 30,
     color: Colors.primary,
-    marginVertical: 10,
   },
   confirmButton: {
     backgroundColor: Colors.secondary,
