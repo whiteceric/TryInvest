@@ -3,6 +3,7 @@ import {
   StyleSheet,
   Text,
   View,
+  TouchableWithoutFeedback,
   TextInput,
   TouchableOpacity,
   ScrollView,
@@ -20,6 +21,7 @@ export const SearchBar = ({
   dropdownContainerStyle,
   dropdownItemStyle,
   dropdownItemText,
+  setParentEnableScrolling,
   onSelect,
   onFocus,
   onDefocus,
@@ -43,14 +45,18 @@ export const SearchBar = ({
     setText(newText.toUpperCase());
     if (newText.length >= 1) {
       setDropdownActive(true);
+      setParentEnableScrolling(false); // disable parent scrolling when dropdown is shown
       setDropdownItems(trie.get(newText));
     } else setDropdownActive(false);
   };
 
   const _onFocus = () => {
+    let _text = text;
     if (text === defaultText) {
       setText("");
+      _text = "";
     }
+    onChangeText(_text);
     onFocus();
   };
 
@@ -60,6 +66,7 @@ export const SearchBar = ({
     }
     onSelect(text);
     setDropdownActive(false);
+    console.log("_defocus");
     onDefocus();
   };
 
@@ -95,14 +102,26 @@ export const SearchBar = ({
         />
       </View>
       {dropdownActive && dropdownItems.length > 0 ? (
-        <FlatList
+        <View
           style={dropdownContainerStyle}
-          data={dropdownItems}
-          keyExtractor={(item, index) => {
-            item + "" + index;
+          onStartShouldSetResponderCapture={() => {
+            setParentEnableScrolling(false); // disable scrolling for the parent view
           }}
-          renderItem={renderItem}
-        />
+        >
+          <FlatList
+            data={dropdownItems}
+            keyExtractor={(item, index) => {
+              item + "" + index;
+            }}
+            renderItem={renderItem}
+            onScrollEndDrag={() => {
+              setParentEnableScrolling(true);
+            }}
+            onSelect={() => {
+              console.log("focused");
+            }}
+          />
+        </View>
       ) : (
         <></>
       )}
@@ -113,5 +132,8 @@ export const SearchBar = ({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.secondary,
+  },
+  fullscreenStyle: {
+    flex: 1,
   },
 });

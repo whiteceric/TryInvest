@@ -35,6 +35,7 @@ export const StockDetailScreen = ({ route }) => {
   const { tag, name, currentPrice, dayChange, sharesOwned } = api[
     route.params.tag
   ];
+
   return (
     <SafeAreaView style={styles.scrollViewContainer}>
       <ScrollView>

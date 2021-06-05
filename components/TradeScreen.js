@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   StyleSheet,
   Text,
   TextInput,
   View,
   SafeAreaView,
+  ScrollView,
   KeyboardAvoidingView,
   TouchableOpacity,
 } from "react-native";
@@ -58,6 +59,11 @@ export const TradeScreen = ({ navigation }) => {
   const [numSharesFocused, setNumSharesFocused] = useState(false);
   const [searching, setSearching] = useState(false);
 
+  const dropDownActive = useRef();
+
+  // need to track whether the ScrollView is scrolling or the search bar flatlist is scrolling
+  const [enableScroll, setEnableScroll] = useState(false);
+
   useEffect(() => {
     setCash(500.34);
     //setStock(api["AAPL"]);
@@ -97,115 +103,128 @@ export const TradeScreen = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.headerText}>Trade</Text>
-      <Text style={styles.cash}>{formatPrice(cash)}</Text>
-      <Text style={styles.cashLabel}>Cash</Text>
-      <View style={styles.tradeModeButtonContainer}>
-        <TouchableOpacity
-          style={[styles.tradeButton].concat(
-            tradeMode == "BUY" ? [styles.activeTradeButton] : []
-          )}
-          activeOpacity={0.7}
-          onPress={() => setTradeMode("BUY")}
-        >
-          <Text
-            style={[styles.tradeButtonText].concat(
-              tradeMode == "BUY" ? [styles.activeTradeButtonText] : []
-            )}
-          >
-            BUY
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tradeButton].concat(
-            tradeMode == "SELL" ? [styles.activeTradeButton] : []
-          )}
-          activeOpacity={0.7}
-          onPress={() => setTradeMode("SELL")}
-        >
-          <Text
-            style={[styles.tradeButtonText].concat(
-              tradeMode == "SELL" ? [styles.activeTradeButtonText] : []
-            )}
-          >
-            SELL
-          </Text>
-        </TouchableOpacity>
-      </View>
-      <SearchBar
-        containerStyle={styles.searchBarContainer}
-        barStyle={styles.searchBar}
-        textStyle={styles.searchBarText}
-        dropdownContainerStyle={styles.searchDropdownContainer}
-        dropdownItemStyle={styles.searchDropdownItem}
-        dropdownItemText={styles.searchDropdownText}
-        defaultText={"Search"}
-        onSelect={symbolSelected}
-        onFocus={() => setSearching(true)}
-        onDefocus={() => setSearching(false)}
-        items={stockList}
-      />
-      <Text style={styles.stockPrice}>
-        {stock == null ? formatPrice(0) : formatPrice(stock.currentPrice)}
-        {console.log(stock)}
-      </Text>
-      <TouchableOpacity
-        style={[
-          styles.moreInfoButton,
-          moreInfoDisabled ? styles.disabledButtonStyle : {},
-        ]}
-        onPress={() => {
-          navigation.navigate("Stock Info", { tag: stock.tag });
-        }}
-        disabled={moreInfoDisabled}
-        activeOpacity={0.7}
-      >
-        <Text style={styles.moreInfoButtonText}>More Info</Text>
-      </TouchableOpacity>
-      <KeyboardAvoidingView behavior="position" enabled={!searching}>
-        <View style={styles.numSharesContainer}>
-          <Text style={styles.numSharesLabel}># of Shares</Text>
-          <TextInput
-            value={
-              numSharesFocused
-                ? numShares == 0
-                  ? ""
-                  : String(numShares)
-                : String(numShares)
-            }
-            onFocus={onNumSharesFocus}
-            onChangeText={onNumSharesInput}
-            onSubmitEditing={onNumSharesSubmit}
-            textAlign={"right"}
-            keyboardType="number-pad"
-            returnKeyType="done"
-            style={styles.numSharesInput}
+    <SafeAreaView
+      onStartShouldSetResponderCapture={() => {
+        setEnableScroll(true);
+      }}
+      style={styles.safeAreaViewStyle}
+    >
+      {console.log(enableScroll)}
+      <ScrollView nestedScrollEnabled={true} scrollEnabled={enableScroll}>
+        <View style={styles.container}>
+          <Text style={styles.headerText}>Trade</Text>
+          <Text style={styles.cash}>{formatPrice(cash)}</Text>
+          <Text style={styles.cashLabel}>Cash</Text>
+          <View style={styles.tradeModeButtonContainer}>
+            <TouchableOpacity
+              style={[styles.tradeButton].concat(
+                tradeMode == "BUY" ? [styles.activeTradeButton] : []
+              )}
+              activeOpacity={0.7}
+              onPress={() => setTradeMode("BUY")}
+            >
+              <Text
+                style={[styles.tradeButtonText].concat(
+                  tradeMode == "BUY" ? [styles.activeTradeButtonText] : []
+                )}
+              >
+                BUY
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.tradeButton].concat(
+                tradeMode == "SELL" ? [styles.activeTradeButton] : []
+              )}
+              activeOpacity={0.7}
+              onPress={() => setTradeMode("SELL")}
+            >
+              <Text
+                style={[styles.tradeButtonText].concat(
+                  tradeMode == "SELL" ? [styles.activeTradeButtonText] : []
+                )}
+              >
+                SELL
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <SearchBar
+            containerStyle={styles.searchBarContainer}
+            barStyle={styles.searchBar}
+            textStyle={styles.searchBarText}
+            dropdownContainerStyle={styles.searchDropdownContainer}
+            dropdownItemStyle={styles.searchDropdownItem}
+            dropdownItemText={styles.searchDropdownText}
+            setParentEnableScrolling={setEnableScroll}
+            defaultText={"Search"}
+            onSelect={symbolSelected}
+            onFocus={() => setSearching(true)}
+            onDefocus={() => setSearching(false)}
+            items={stockList}
           />
+          <Text style={styles.stockPrice}>
+            {stock == null ? formatPrice(0) : formatPrice(stock.currentPrice)}
+          </Text>
+          <TouchableOpacity
+            style={[
+              styles.moreInfoButton,
+              moreInfoDisabled ? styles.disabledButtonStyle : {},
+            ]}
+            onPress={() => {
+              navigation.navigate("Stock Info", { tag: stock.tag });
+            }}
+            disabled={moreInfoDisabled}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.moreInfoButtonText}>More Info</Text>
+          </TouchableOpacity>
+          <KeyboardAvoidingView behavior="position" enabled={!searching}>
+            <View style={styles.numSharesContainer}>
+              <Text style={styles.numSharesLabel}># of Shares</Text>
+              <TextInput
+                value={
+                  numSharesFocused
+                    ? numShares == 0
+                      ? ""
+                      : String(numShares)
+                    : String(numShares)
+                }
+                onFocus={onNumSharesFocus}
+                onChangeText={onNumSharesInput}
+                onSubmitEditing={onNumSharesSubmit}
+                textAlign={"right"}
+                keyboardType="number-pad"
+                returnKeyType="done"
+                style={styles.numSharesInput}
+              />
+            </View>
+          </KeyboardAvoidingView>
+          <Text style={styles.estimatedValue}>
+            Estimated {tradeMode == "BUY" ? "Cost" : "Value"}:{" "}
+            {stock == null
+              ? formatPrice(0)
+              : formatPrice(numShares * stock.currentPrice)}
+          </Text>
+          <TouchableOpacity
+            style={[
+              styles.confirmButton,
+              confirmDisabled ? styles.disabledButtonStyle : {},
+            ]}
+            onPress={() => console.log("Confirm")}
+            disabled={confirmDisabled}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.confirmButtonText}>Confirm</Text>
+          </TouchableOpacity>
         </View>
-      </KeyboardAvoidingView>
-      <Text style={styles.estimatedValue}>
-        Estimated {tradeMode == "BUY" ? "Cost" : "Value"}:{" "}
-        {stock == null
-          ? formatPrice(0)
-          : formatPrice(numShares * stock.currentPrice)}
-      </Text>
-      <TouchableOpacity
-        style={[
-          styles.confirmButton,
-          confirmDisabled ? styles.disabledButtonStyle : {},
-        ]}
-        onPress={() => console.log("Confirm")}
-        disabled={confirmDisabled}
-        activeOpacity={0.7}
-      >
-        <Text style={styles.confirmButtonText}>Confirm</Text>
-      </TouchableOpacity>
+      </ScrollView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeAreaViewStyle: {
+    backgroundColor: Colors.background,
+  },
   container: {
     flex: 1,
     backgroundColor: Colors.background,
