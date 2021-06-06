@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { HomeScreen } from "./HomeScreen";
 import { TradeScreen } from "./TradeScreen";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -10,7 +10,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 
 const Tab = createBottomTabNavigator();
 
-export const TabNavigator = ({ navigation }) => {
+export const TabNavigator = ({ navigation, route }) => {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -32,14 +32,8 @@ export const TabNavigator = ({ navigation }) => {
         style: styles.tabBar,
       }}
     >
-      <Tab.Screen
-        name="Home"
-        children={() => <HomeScreen navigation={navigation} />}
-      />
-      <Tab.Screen
-        name="Trade"
-        children={() => <TradeScreen navigation={navigation} />}
-      />
+      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Trade" component={TradeScreen} />
     </Tab.Navigator>
   );
 };

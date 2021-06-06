@@ -15,7 +15,7 @@ import { Colors } from "../assets/Colors";
 import up_arrow from "../assets/images/up_arrow.png";
 import down_arrow from "../assets/images/down_arrow.png";
 
-export const StockDetailScreen = ({ route }) => {
+export const StockDetailScreen = ({ navigation, route }) => {
   const api = {
     AAPL: {
       tag: "AAPL",
@@ -44,7 +44,9 @@ export const StockDetailScreen = ({ route }) => {
           <TouchableOpacity
             style={styles.tradeButton}
             activeOpacity={0.7}
-            onPress={() => console.log("trade")}
+            onPress={() => {
+              navigation.navigate("Trade");
+            }}
           >
             <Text style={styles.tradeButtonText}>TRADE</Text>
           </TouchableOpacity>
