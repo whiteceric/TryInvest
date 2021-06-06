@@ -57,7 +57,7 @@ export const TradeScreen = ({ navigation }) => {
   const [confirmDisabled, setConfirmDisabled] = useState(false);
   const [numShares, setNumShares] = useState(0);
   const [numSharesFocused, setNumSharesFocused] = useState(false);
-  const [searching, setSearching] = useState(false);
+  const [searching, _setSearching] = useState(false);
 
   const dropDownActive = useRef();
 
@@ -66,8 +66,19 @@ export const TradeScreen = ({ navigation }) => {
 
   useEffect(() => {
     setCash(500.34);
+    setConfirmDisabled(stock == null);
+    setMoreInfoDisabled(stock == null);
     //setStock(api["AAPL"]);
   }, []);
+
+  // wrapper for mutating the searching state so that we can update other UI when searching begins/ends
+  const setSearching = (value) => {
+    _setSearching(value);
+    if (value) {
+      setMoreInfoDisabled(true);
+      setConfirmDisabled(true);
+    }
+  };
 
   const symbolSelected = (symbol) => {
     if (api.hasOwnProperty(symbol)) {
@@ -109,7 +120,6 @@ export const TradeScreen = ({ navigation }) => {
       }}
       style={styles.safeAreaViewStyle}
     >
-      {console.log(enableScroll)}
       <ScrollView nestedScrollEnabled={true} scrollEnabled={enableScroll}>
         <View style={styles.container}>
           <Text style={styles.headerText}>Trade</Text>
