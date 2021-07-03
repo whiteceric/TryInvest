@@ -233,6 +233,7 @@ export const TradeScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   safeAreaViewStyle: {
+    flex: 1,
     backgroundColor: Colors.background,
   },
   container: {
