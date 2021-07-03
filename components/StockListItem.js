@@ -7,6 +7,7 @@ import {
   Image,
   TouchableOpacity,
   TouchableHighlight,
+  Dimensions,
 } from "react-native";
 
 import { Colors } from "../assets/Colors";
@@ -19,7 +20,8 @@ export const formatPrice = (price) => {
 
 const getPriceSize = (formattedPrice) => {
   const len = formattedPrice.length;
-  return len < 8 ? 52 : 52 - 3 * (len - 8);
+  const scale = Dimensions.get("window").width > 375 ? 10 : 12;
+  return len < 8 ? 52 : 52 - scale * (len - 8);
 };
 
 export const StockListItem = ({
